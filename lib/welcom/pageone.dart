@@ -36,12 +36,13 @@ class _PageoneState extends State<Pageone> {
                     child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 25),
                   child: Text(
-                    "Welcom to my aplication",
+                    "Welcome To My Application",
                     style: TextStyle(fontSize: 25),
                   ),
                 )),
                 Row(
-                  textDirection: TextDirection.ltr,
+
+                  textDirection: TextDirection.rtl,
                   children: [
                     Container(
                       decoration: BoxDecoration(

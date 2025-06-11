@@ -71,7 +71,7 @@ class _PagethreeState extends State<Pagethree> {
                       ),
                       margin: EdgeInsets.symmetric(vertical: 30 ,horizontal: 5),
                       child: MaterialButton(onPressed: (){
-                        Navigator.of(context).pushReplacementNamed('homes_select');
+                        Navigator.of(context).pushReplacementNamed('select');
                       },
 
                         child:

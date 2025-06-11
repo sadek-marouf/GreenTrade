@@ -1,9 +1,11 @@
+import 'package:farm1/auth/register_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../counter_bloc.dart';
-import 'framwork.dart';
+import '../Farmer/Service/framwork.dart';
+
+
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -29,18 +31,36 @@ class _RegisterPageState extends State<RegisterPage> {
     'As-Suwayda', 'Deir ez-Zor', 'Al-Hasakah', 'Raqqa'
   ];
 
+
+  Future<String?> getAccountType() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accountType');
+  }
+
   @override
   Widget build(BuildContext context) {
+
+
+
+      String? type = getAccountType().toString();
+
+
+
+
+
+
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-          child: Text(
-            "Join Now For Free",
-            style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
+        backgroundColor: Colors.lightGreen,
+        title:
+           Text(
+              "Green Trade",
+              style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
+            ),
           ),
-        ),
+
         backgroundColor: Colors.green[600],
-      ),
+
       body: Stack(
         children: [
           Container(
@@ -56,11 +76,11 @@ class _RegisterPageState extends State<RegisterPage> {
             listener: (context, state) {
               if (state is RegisterSuccess) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("تم التسجيل بنجاح!")),
+                  const SnackBar(content: Text("Registration successful!")),
                 );
               } else if (state is RegisterError) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("فشل التسجيل: ${state.message}")),
+                  SnackBar(content: Text("Registration failed:${state.message}")),
                 );
               }
             },
@@ -72,11 +92,12 @@ class _RegisterPageState extends State<RegisterPage> {
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
+
                   Text(
-                    "Register As Farmer",
+                    "Please Enter Your Personal Information ",
                     style: TextStyle(
                       color: Colors.blue[600],
-                      fontSize: 30,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -87,22 +108,22 @@ class _RegisterPageState extends State<RegisterPage> {
                   Costmer(iconn: Icons.email, controler: emailController, title: 'Email Address *', textInputType: TextInputType.emailAddress),
                   Costmer(iconn: Icons.phone, controler: phoneController, title: 'Phone Number', textInputType: TextInputType.phone),
                   Costmer(iconn: Icons.lock, controler: passwordController, title: 'Password', isPassword: true),
-                  Costmer(iconn: Icons.lock, controler: confirmPasswordController, title: 'Confirm Password', isPassword: true),
+                  Costmer(iconn: Icons.lock, controler: confirmPasswordController, title: 'Confirm Password', isPassword: true, ),
 
                   Container(
                     height: 60,
                     padding: const EdgeInsets.symmetric(horizontal: 10),
-                    margin: const EdgeInsets.only(bottom: 30),
+                    margin: const EdgeInsets.only(bottom: 10),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(60),
+                      borderRadius: BorderRadius.circular(8),
                       color: Colors.white,
                     ),
                     child: DropdownButton<String>(
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                       hint: Row(
                         children: const [
-                          Icon(Icons.public, color: Colors.blue, size: 30),
+                          Icon(Icons.public, size: 30 , color: Colors.lightGreen,),
                           Text(" Select Governorate", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black)),
                         ],
                       ),
@@ -123,14 +144,14 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
 
-                  Costmer(iconn: Icons.location_city, controler: cityController, title: "City *"),
+                  Costmer(iconn: Icons.location_city, controler: cityController, title: "City " ),
                   Costmer(iconn: Icons.holiday_village, controler: villageController, title: "Village"),
                   const SizedBox(height: 20),
 
                   const Center(
                     child: Text(
                       "By clicking 'Register' you agree to our",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
 
@@ -151,6 +172,33 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ],
                   ),
+                  Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Have Account ? ",
+                            style: TextStyle(fontSize: 15),
+                          ),
+                          MaterialButton(
+                            onPressed: () {
+                              Navigator.of(context).pushNamed("login");
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(2),
+
+                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(60),color: Colors.white,),
+                              child: Text(
+                                "Login Now",
+                                style: TextStyle(
+                                    color: Colors.lightGreen,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15),
+                              ),
+                            ),
+                          )
+                        ],
+                      )) ,
 
                   Container(
                     decoration: BoxDecoration(
@@ -162,28 +210,27 @@ class _RegisterPageState extends State<RegisterPage> {
                       onPressed: () async {
                         if (passwordController.text != confirmPasswordController.text) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("كلمة السر وتأكيدها غير متطابقين!")  ,backgroundColor: Colors.red,),
+                            const SnackBar(content: Text("The password and confirmation do not match!")  ,backgroundColor: Colors.red,),
                           );
                           return;
                         }
 
-                        if (selectedGovernorate == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("يرجى اختيار المحافظة!"),backgroundColor: Colors.red,),
-                          );
-                          return;
-                        }
-                        if(firstNameController.text.isEmpty || lastNameController.text.isEmpty || emailController.text.isEmpty || phoneController.text.isEmpty || cityController.text.isEmpty) {
+
+                        if(firstNameController.text.isEmpty || lastNameController.text.isEmpty || emailController.text.isEmpty || phoneController.text.isEmpty ) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text("يجب ملئ جميع الحقول التي بجانبها نجمة " ) ,backgroundColor: Colors.red,),
+                                content: Text("All fields marked with an asterisk must be completed." ) ,backgroundColor: Colors.red,),
                           );
                           return;
                         }
+
+
                         // تخزين البيانات باستخدام SharedPreferences
+
                         SharedPreferences prefs = await SharedPreferences.getInstance();
-                        await prefs.setString('firstName', firstNameController.text);
-                        await prefs.setString('lastName', lastNameController.text);
+
+                        await prefs.setString('first_name', firstNameController.text);
+                        await prefs.setString('last_name', lastNameController.text);
                         await prefs.setString('email register', emailController.text);
                         await prefs.setString('phone', phoneController.text);
                         await prefs.setString('governorate', selectedGovernorate!);
@@ -191,20 +238,14 @@ class _RegisterPageState extends State<RegisterPage> {
                         await prefs.setString('village', villageController.text);
                         // من الأفضل عدم تخزين كلمة السر للحماية
 
+
                         // إنشاء موديل المستخدم
-                        final user = UserModel(
-                          firstName: firstNameController.text,
-                          lastName: lastNameController.text,
-                          email: emailController.text,
-                          phone: phoneController.text,
-                          password: passwordController.text,
-                          governorate: selectedGovernorate!,
-                          city: cityController.text,
-                          village: villageController.text,
-                        );
+
+
 
                         // إرسال البيانات لـ Bloc
-                        BlocProvider.of<RegistrationBloc>(context).add(RegisterUser(user: user));
+                        context.read<RegistrationBloc>().add(SubmitRegistrationEvent());
+
                       },
                       child: const Text("Register", style: TextStyle(color: Colors.white)),
                     ),
@@ -221,6 +262,7 @@ class _RegisterPageState extends State<RegisterPage> {
 // lib/models/user_model.dart
 
 class UserModel {
+  final String accounttype;
   final String firstName;
   final String lastName;
   final String email;
@@ -231,6 +273,7 @@ class UserModel {
   final String village;
 
   UserModel({
+    required this.accounttype,
     required this.firstName,
     required this.lastName,
     required this.email,
@@ -241,10 +284,12 @@ class UserModel {
     required this.village,
   });
 
+
   Map<String, dynamic> toMap() {
     return {
-      'firstName': firstName,
-      'lastName': lastName,
+      'account type': accounttype,
+      'first_name': firstName,
+      'last_name': lastName,
       'email': email,
       'phone': phone,
       'password': password,
@@ -254,6 +299,15 @@ class UserModel {
     };
   }
 }
+class color {
+
+}
+//
+
+
+//201
+
+
 
 
 
@@ -262,7 +316,7 @@ class UserModel {
 // import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 //
-// import '../counter_bloc.dart';
+// import '../register_bloc.dart';
 // import 'framwork.dart';
 //
 // class RegisterPage extends StatefulWidget {

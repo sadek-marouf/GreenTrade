@@ -1,7 +1,9 @@
 
 import 'package:farm1/WelcomPage.dart';
 import 'package:farm1/auth/homepageselect.dart';
-import 'package:farm1/test.dart';
+
+
+
 import 'package:farm1/welcom/pageone.dart';
 import 'package:farm1/welcom/pagethree.dart';
 import 'package:farm1/welcom/pagetwo.dart';
@@ -9,10 +11,15 @@ import 'package:farm1/welcom/pagetwo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'Farmer/farmerdashbord.dart';
+import 'Farmer/nave.dart';
+import 'Farmer/profile.dart';
+import 'Trader/homepage.dart';
+import 'Trader/nav_tra.dart';
 import 'auth/login.dart';
 import 'auth/register.dart';
-import 'counter_bloc.dart';
-import 'farmerdashbord.dart';
+import 'auth/register_bloc.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -34,7 +41,7 @@ class MyApp extends StatelessWidget {
     child :
 
       MaterialApp(
-        home:Pageone(),
+        home:AnimatedNavBarPageTrader(),
 
 
         routes: {
@@ -43,9 +50,12 @@ class MyApp extends StatelessWidget {
           'page three' :(context) => const Pagethree(),
           'login': (context) => const LoginPage(),
           'register': (context) => const RegisterPage(),
-          'homes_select': (context) => const HomePageSelect(),
-          'farmer'   : (context) => const FarmerDashboard() ,
-        },
+          'welcome' : (context) => FarmerHomePage(),
+          'select' : (context) => HomePageSelect(),
+
+
+          'profile' : (context) => const ProfileScreen() ,
+         },
       )
     ) ;
   }}

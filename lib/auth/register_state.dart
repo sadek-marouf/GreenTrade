@@ -1,4 +1,4 @@
-part of 'counter_bloc.dart';
+part of 'register_bloc.dart';
 
 @immutable
 abstract class RegistrationState {}

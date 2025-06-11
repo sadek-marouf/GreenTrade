@@ -45,6 +45,7 @@ class Costmer extends StatefulWidget {
   final IconData? iconn;
   final TextInputType textInputType;
   final bool isPassword;
+  final Color? ccolor ;
 
   final TextEditingController controler;
 
@@ -52,12 +53,14 @@ class Costmer extends StatefulWidget {
 
   const Costmer({
     Key? key,
+   this.ccolor = Colors.blue,
     required this.iconn,
     required this.controler,
     this.namee = '',
     required this.title,
+
     this.textInputType = TextInputType
-        .text, this.isPassword = false, // قيمة افتراضية لنوع الإدخال
+        .text, this.isPassword = false,  // قيمة افتراضية لنوع الإدخال
   }) : super(key: key);
 
   @override
@@ -67,8 +70,8 @@ class Costmer extends StatefulWidget {
 class _CostmerState extends State<Costmer> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 110,
+    return SizedBox(
+      height: 80,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -98,15 +101,11 @@ class _CostmerState extends State<Costmer> {
                 filled: true,
                 prefixIcon: Icon(
                   widget.iconn,
-                  color: Colors.blue[600],
+                  color: widget.ccolor,
                   size: 30,
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: const BorderRadius.only(
-                      topLeft: Radius.zero,
-                      topRight: Radius.circular(60),
-                      bottomLeft: Radius.circular(60),
-                      bottomRight: Radius.circular(60)),
+                  borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(
                     color: Color.fromARGB(255, 197, 103, 97),
                     width: 5,
@@ -126,99 +125,104 @@ class _CostmerState extends State<Costmer> {
   }
 }
 
-Future<bool> LoginUser(String email, String password) async {
-  final url = Uri.parse("Api");
-  try {
-    final response = await http.post(url, headers: {
-      "Content-Type": "application/json"
-    }, body: jsonEncode({
-      "email": email,
-      "password": password,})
-    ) ;
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-
-      if (data['status'] == 'success') {
-        print("Login Success 🎉");
-
-        print("User Data: ${data['user']}")
-        ;
-
-
-        return true ;
 
 
 
-      } else {
-        print("Login Failed: ${data['message']}");
-        return false ;
-      }
-    } else {
-      print("Server Error: ${response.statusCode}");
-      return false ;
-    }
-  } catch (error) {
-    print("Error occurred: $error");
-    return false  ;
-  }
+/////////////////
+class Product {
+  final int id;
+  final String name;
 
-}
-// Future<void> saveuserdata (String email , usertype) async {
-//   SharedPreferences prefs = await SharedPreferences.getInstance();
-//
-//   await prefs.setString('email', email);
-//   await prefs.setString('userType', usertype);
-//
-//   print("Data Saved Successfully!");
-// }
+  Product({required this.id, required this.name});
 
-/////////Animation
-
-
-class AnimatedHeaderText extends StatefulWidget {
-  @override
-  _AnimatedHeaderTextState createState() => _AnimatedHeaderTextState();
-}
-
-class _AnimatedHeaderTextState extends State<AnimatedHeaderText>
-    with SingleTickerProviderStateMixin {
-  bool _visible = true;
-
-  @override
-  void initState() {
-    super.initState();
-    // تحريك الوميض كل ثانية
-    _startBlinking();
-  }
-
-  void _startBlinking() {
-    Future.doWhile(() async {
-      await Future.delayed(Duration(seconds: 1));
-      if (!mounted) return false;
-      setState(() {
-        _visible = !_visible;
-      });
-      return true;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      duration: Duration(milliseconds: 500),
-      opacity: _visible ? 1.0 : 0.0,
-      child: Text(
-        'Start As :',
-        style: TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-        textAlign: TextAlign.center,
-      ),
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: json['id'],
+      name: json['name'],
     );
   }
+
 }
+///////////////////
+
+class Products {
+
+  final String category ;
+  final String name;
+  final double price;
+  final double quantity;
+  final double? discount;
+  final String image;
+
+
+  Products({
+
+    required this.category,
+    required this.name,
+    required this.price,
+    required this.quantity,
+    required this.discount,
+    required this.image,
+  });
+  factory Products.fromjson(Map<String,dynamic>json){
+    return Products(
+
+      category: json['catecory'],
+      name: json['name'],
+      price: json['price'],
+      quantity: json['quantity'],
+      discount: json['discount'],
+      image: json['image']
+
+    ) ;
+  }
 
 
 
+
+
+
+}
+///////////////////
+
+class Get_Products {
+
+  final   category ;
+  final int id ;
+  final String name;
+  final double price;
+  final double quantity;
+  final double? discount;
+  final String image;
+
+
+  Get_Products({
+
+    required this.category,
+    required this.id ,
+    required this.name,
+    required this.price,
+    required this.quantity,
+    required this.discount,
+    required this.image,
+  });
+  factory Get_Products.fromjson(Map<String,dynamic>json){
+    return Get_Products(
+
+        category: json['category'],
+        id: json['id'],
+        name: json['name'],
+        price: json['price'],
+        quantity: json['quantity'],
+        discount: json['discount'],
+        image: json['image']
+
+    ) ;
+  }
+
+
+
+
+
+
+}

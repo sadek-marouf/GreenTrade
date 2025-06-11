@@ -6,17 +6,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 
-part 'login_register_event.dart';
-part 'login_register_state.dart';
+part 'login_event.dart';
+part 'login_state.dart';
 
-class LoginRegisterBloc extends Bloc<LoginRegisterEvent, LoginRegisterState> {
-  LoginRegisterBloc() : super(LoginInitial()) {
+class LoginBloc extends Bloc<LoginEvent, LoginState> {
+  LoginBloc() : super(LoginInitial()) {
     on<LoginButtonPressed>(_onloginbuttonpressed);
+    on<LogoutRequested>(_onLogoutRequested);
   }
 }
-Future<void> _onloginbuttonpressed(LoginButtonPressed event , Emitter<LoginRegisterState> emit) async{
+Future<void> _onloginbuttonpressed(LoginButtonPressed event , Emitter<LoginState> emit) async{
   emit(LoginLoading() )  ;
-  final url = Uri.parse("Api");
+  final url = Uri.parse("https://37aa017e77720a1063768fc6ea025329.serveo.net/api/login");
   try {
 
 
@@ -26,6 +27,7 @@ Future<void> _onloginbuttonpressed(LoginButtonPressed event , Emitter<LoginRegis
       "email": event.email,
       "password": event.password,})
     ) ;
+    print(response.body) ;
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
 
@@ -64,3 +66,32 @@ Future<void> _onloginbuttonpressed(LoginButtonPressed event , Emitter<LoginRegis
     
     emit(LoginFailure(error: e.toString())) ;
   }}
+Future<void> _onLogoutRequested(LogoutRequested event, Emitter<LoginState> emit) async {
+  emit(LogoutInProgress());
+
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      emit(LogoutSuccess());
+      return;
+    }
+
+    final url = Uri.parse("https://37aa017e77720a1063768fc6ea025329.serveo.net/api/logout");
+
+    final response = await http.post(url, headers: {
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/json',
+    });
+
+    if (response.statusCode == 200) {
+      await prefs.clear(); // نمسح كل شيء محفوظ
+      emit(LogoutSuccess());
+    } else {
+      emit(LogoutFailure(error: 'Server error: ${response.statusCode}'));
+    }
+  } catch (e) {
+    emit(LogoutFailure(error: e.toString()));
+  }
+}
