@@ -1,7 +1,29 @@
 
+import 'package:farm1/Trader/Service/repositories/Trader_Repo.dart';
+import 'package:farm1/Trader/Trader_Bloc/getproductfarmer/get_list_product_bloc.dart';
 import 'package:farm1/Trader/homepage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
+
+
+class NavBarPageTrader extends StatelessWidget {
+  const NavBarPageTrader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final repo = TraderRepo(http.Client()) ;
+    return MultiBlocProvider(providers: [
+      BlocProvider<GetListProductBloc>(create: (_) => GetListProductBloc(repo) )
+
+    ], child: Builder(builder: (context){
+      return AnimatedNavBarPageTrader() ;
+    }));
+  }
+}
+
+
 
 class AnimatedNavBarPageTrader extends StatefulWidget {
   @override

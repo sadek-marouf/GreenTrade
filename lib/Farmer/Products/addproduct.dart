@@ -43,7 +43,22 @@ class _AddProductModalState extends State<AddProductModal> {
       });
     }
   }
+  @override
+  void initState() {
+    super.initState();
 
+    // تصفير القيم
+    _category = null;
+    _selectedProduct = null;
+    _quantity = 0;
+    _price = 0;
+    _discount = 0;
+    _pickedImage = null;
+
+    _searchController.clear();
+    _quantityController.clear();
+    _priceController.clear();
+  }
   @override
   void dispose() {
     _searchController.dispose();
@@ -134,87 +149,86 @@ class _AddProductModalState extends State<AddProductModal> {
                   if (state is ProductsLoading) {
                     return Center(child: CircularProgressIndicator());
                   }
-                  if (state is ProductsLoaded) {
-                    final filtered = state.products
-                        .where((p) => p.name
-                            .toLowerCase()
-                            .contains(_searchController.text.toLowerCase()))
-                        .toList();
+                 else if (state is ProductsError) {
+                    return Center(child: Text('Error loading products'));
+                  }
+                  else if (state is ProductsLoaded) {
+                    final products = state.products; // List<Prdbycategory>
+                    final filtered = products.where((p) =>
+                        p.name.toLowerCase().contains(_searchController.text.toLowerCase())).toList();
+
+                    if (filtered.isEmpty) {
+                      return Center(child: Text('No products found'));
+                    }
 
                     return Wrap(
                       spacing: 12,
                       runSpacing: 12,
-                      children: filtered.map((name) {
+                      children: filtered.map((product) {
+                        final isSelected = _selectedProduct == product.name;
                         return GestureDetector(
-                          onTap: () => setState(
-                              () => _selectedProduct = name as String?),
+                          onTap: () => setState(() {
+                            _selectedProduct = product.name;
+                          }),
                           child: AnimatedContainer(
                             duration: Duration(milliseconds: 300),
                             padding: EdgeInsets.all(8),
-                            width: 100,
+                            width: 110,
                             decoration: BoxDecoration(
-                              color: _selectedProduct == name
-                                  ? activeColor.withOpacity(0.2)
-                                  : _lightGreen.withOpacity(0.2),
+                              color: isSelected
+                                  ? activeColor.withOpacity(0.25)
+                                  : _lightGreen.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: _selectedProduct == name
-                                    ? activeColor
-                                    : Colors.transparent,
+                                color: isSelected ? activeColor : Colors.transparent,
                                 width: 2,
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 6,
+                                  offset: Offset(0, 3),
+                                ),
+                              ],
                             ),
-                            child: Center(
-                              child: Text(name as String,
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.w500)),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    product.image,
+                                    height: 70,
+                                    width: 70,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image, size: 70, color: Colors.grey),
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  product.name,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected ? activeColor : Colors.black87,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
                           ),
                         );
                       }).toList(),
                     );
-                  } else if (state is ProductsError) {
-                    return Center(child: Text('Error loading products'));
-                  } else {
+                  }
+                 else {
                     return SizedBox.shrink();
                   }
                 },
               )
 
-              // Wrap(
-              //   spacing: 12,
-              //   runSpacing: 12,
-              //   children: _filteredProducts.map((product) {
-              //     final name = product['name']!;
-              //     final image = product['image']!;
-              //     return GestureDetector(
-              //       onTap: () => setState(() => _selectedProduct = name),
-              //       child: AnimatedContainer(
-              //         duration: Duration(milliseconds: 300),
-              //         padding: EdgeInsets.all(8),
-              //         width: 100,
-              //         decoration: BoxDecoration(
-              //           color: _selectedProduct == name
-              //               ? activeColor.withOpacity(0.2)
-              //               : _lightGreen.withOpacity(0.2),
-              //           borderRadius: BorderRadius.circular(16),
-              //           border: Border.all(
-              //             color: _selectedProduct == name ? activeColor : Colors.transparent,
-              //             width: 2,
-              //           ),
-              //         ),
-              //         child: Column(
-              //           mainAxisSize: MainAxisSize.min,
-              //           children: [
-              //             Image.network(image, height: 40, width: 40),
-              //             SizedBox(height: 8),
-              //             Text(name, style: TextStyle(fontWeight: FontWeight.w500))
-              //           ],
-              //         ),
-              //       ),
-              //     );
-              //   }).toList(),
-              // ),
+
               ,
               SizedBox(height: 20),
             ],
@@ -258,7 +272,7 @@ class _AddProductModalState extends State<AddProductModal> {
                 ],
               ),
               const SizedBox(height: 10),
-              Text('Price',
+              Text('Price of Kilo',
                   style: TextStyle(
                       fontWeight: FontWeight.bold, color: activeColor)),
               Row(
@@ -321,9 +335,33 @@ class _AddProductModalState extends State<AddProductModal> {
                 ],
               ),
               const SizedBox(height: 20),
-              Text('Product Image',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: activeColor)),
+              Center(
+                child: Container(decoration: BoxDecoration(
+                  border: Border.all(color: activeColor)
+                      ,borderRadius: BorderRadius.circular(40)
+                ),
+                  margin: EdgeInsets.symmetric(horizontal: 80,vertical: 20),
+                  padding: EdgeInsets.all(20),
+                  child: Row(children: [
+
+                   Text('Total Price : ' ,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
+                   , Text(
+                      '${( (_quantity * _price) * (1 - _discount / 100) ).toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: activeColor,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],),
+                ),
+              ),
+              Text("Add Image to Product", style:TextStyle(
+                fontWeight: FontWeight.bold,
+                color: activeColor,
+                fontSize: 16,
+              ),),
+
               SizedBox(height: 10),
               Center(
                 child: GestureDetector(
@@ -356,10 +394,8 @@ class _AddProductModalState extends State<AddProductModal> {
 
                   if (state is AddProductLoaded) {
                     Future.microtask(() {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Product added successfully!')),
-                      );
+                      Navigator.pop(context, true);
+                      context.read<ProductsBloc>().add(ResetAddProductState()); // 🟢 Reset الحالة
                     });
                     return SizedBox.shrink();
                   }
@@ -376,8 +412,15 @@ class _AddProductModalState extends State<AddProductModal> {
                     onPressed: isFormValid && _pickedImage != null
                         ? () {
                       context.read<ProductsBloc>().add(
-                        Addproduct(id_category: _category!, name_product: _selectedProduct!, price: _price, quantity: _quantity, image: _pickedImage)
+                        Addproduct(
+                          id_category: _category!,
+                          name_product: _selectedProduct!,
+                          priceofkilo: _price,
+                          quantity: _quantity,
+                          image: _pickedImage,
+                        ),
                       );
+                      // لا تسكر المودال هون! خليه يسكر لما Bloc يرجع حالة النجاح
                     }
                         : null,
                     child: Text("Add Product"),

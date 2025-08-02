@@ -135,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
                       } else if (state is LoginSuccess) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           Navigator.of(context)
-                              .pushReplacementNamed("homepage");
+                              .pushReplacementNamed("nav");
                         });
                         return Text(
                           "Login Successful!",

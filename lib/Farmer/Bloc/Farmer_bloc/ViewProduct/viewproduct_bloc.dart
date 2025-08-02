@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Service/framwork.dart';
 
@@ -20,89 +21,52 @@ class ViewproductBloc extends Bloc<ViewproductEvent, ViewproductState> {
     on<GetProducts>(_Viewproduct);
   }
   Future<void> _Viewproduct(
-      ViewproductEvent event ,
-      Emitter<ViewproductState> emit
-      ) async {
-    emit(ViewProductLoading()) ;
+      GetProducts event, Emitter<ViewproductState> emit) async {
+    emit(ViewProductLoading());
 
-    try{
-      final fakeProducts = [
-       {  'category' : "fruit",
-         'id' : 20 ,
-         'name' : "tomatom" ,
-         "price" : 21.0 ,
-         "quantity" : 25.0,
-         "image" : "images/farmer.jpg"
-       },
-        {  'category' : "veg",
-          'id' : 35 ,
-          'name' : "tomatom" ,
-          "price" : 21.0 ,
-          "quantity" : 25.0,
-          "image" : "images/farmer.jpg"
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+      print("🚀 Sending request to API...");
+
+      final response = await http.get(
+        Uri.parse("http://10.154.48.169:8000/api/products"),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
         },
-        {  'category' : "fruit",
-          'id' : 45 ,
-          'name' : "tomatom" ,
-          "price" : 21.0 ,
-          "quantity" : 25.0,
-          "image" : "images/farmer.jpg" ,
-          "discount": 20.3
-        } ,
-        { 'category' : "veg",
-          'id' : 85 ,
-          'name' : "tomatom" ,
-          "price" : 21.0 ,
-          "quantity" : 25.0,
-          "image" : "images/farmer.jpg" ,
-          "discount": 20.3
-        },
-        {  'category' : "veg",
-          'id' : 75 ,
-          'name' : "tomamtom" ,
-          "price" : 21.0 ,
-          "quantity" : 25.0,
-          "image" : "images/farmer.jpg" ,
-          "discount": 30.3
-        },
-        {  'category' : "fruit",
-          'id' : 65 ,
-          'name' : "tomasdmtom" ,
-          "price" : 21.0 ,
-          "quantity" : 25.0,
-          "image" : "images/farmer.jpg" ,
-          "discount": 30.3
-        },
-        {  'category' : "veg",
-          'id' : 55 ,
-          'name' : "tomsdfamtom" ,
-          "price" : 21.0 ,
-          "quantity" : 25.0,
-          "image" : "images/farmer.jpg" ,
-          "discount": 30.3
-        }
-      ];
-      // final response =await http.get(
-      //   Uri.parse("__________________API_________________") ,
-      //       headers: {
-      //         'Authorization': 'Token',
-      //         'Accept': 'application/json',
-      //
-      // }
-      // );
-      // if (response.statusCode ==201 ){
-      //   final List<dynamic> data = jsonDecode(response.body);
-      //   final products = data.map((e) => Products.fromjson(e)).toList();
-      final Get_products = fakeProducts.map((e) => Get_Products.fromjson(e)).toList();
-      emit(ViewProductLoaded(Get_products));
+      );
+      print("📬 Response status: ${response.statusCode}");
+      print("📦 Response body: ${response.body}");
+
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+      print("🔑 Token is: $token");
 
 
+      if (response.statusCode == 200) {
+
+
+        final decoded = jsonDecode(response.body);
+        print(response) ;
+
+
+       
+        final List<dynamic> data = decoded['products'];
+
+
+        final getProducts = data.map((e) => Get_Products.fromJson(e)).toList();
+
+        emit(ViewProductLoaded(getProducts));
+      } else {
+        emit(ViewProductError('Server error: ${response.statusCode}'));
+      }
     } catch (e) {
-      emit(ViewProductError('Error: ${e.toString()}'));
+      emit(ViewProductError('Exception: $e'));
     }
   }
 
 
-    }
+}
 
 

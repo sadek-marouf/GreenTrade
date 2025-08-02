@@ -18,14 +18,17 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   ProductsBloc(this.repo) : super(ProductsInitial()) {
     on<fetchProducts>(_onFetch);
     on<Addproduct>(_onAdd);
+    on<ResetAddProductState>((event, emit) {
+      emit(ProductsInitial());
+    });
   }
 
   Future<void> _onFetch(fetchProducts event,
       Emitter<ProductsState> emit) async {
     emit(ProductsLoading());
     try {
-      final list = await repo.fetchByCategory(event.category);
-      emit(ProductsLoaded(list.cast<Product>()));
+      final list = await repo.fetchProductNamesByType(event.category);
+      emit(ProductsLoaded(list));
     } catch (e) {
       emit(ProductsError(e.toString()));
     }
@@ -38,13 +41,15 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
         idCategory: event.id_category,
 
         nameProduct: event.name_product,
-        price: event.price,
+        priceofkilo: event.priceofkilo,
+
         quantity: event.quantity,
         image: event.image! ,
         discount: event.discount,
       );
       emit(AddProductLoaded());
     } catch (e) {
+      print(e);
       emit(AddProductError(e.toString()));
     }
   }

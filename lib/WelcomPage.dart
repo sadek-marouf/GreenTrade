@@ -29,6 +29,7 @@ class _FarmerHomePageState extends State<FarmerHomePage> {
   void initState() {
     super.initState();
     _pageController = PageController(viewportFraction: 0.9);
+
   }
 
   @override
@@ -86,7 +87,7 @@ class _FarmerHomePageState extends State<FarmerHomePage> {
               ),
             ),
           ),
-          drawer: Container(),
+          drawer: Container(),  
           body: DefaultTabController(
             length: 2,
             child: Container(
@@ -104,7 +105,7 @@ class _FarmerHomePageState extends State<FarmerHomePage> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             child: Text(
-                              "Best Deals",
+                              "Your Deals",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 24,
@@ -176,11 +177,12 @@ class _FarmerHomePageState extends State<FarmerHomePage> {
                                               ClipRRect(
                                                 borderRadius:
                                                     BorderRadius.circular(12),
-                                                child: Image.asset(
+                                                child: Image.network(
                                                   prod.image,
-                                                  width: size.width * 0.3,
-                                                  height: size.height * 0.13,
+                                                  width: 120,
+                                                  height: size.height * 0.15,
                                                   fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
                                                 ),
                                               ),
                                               const SizedBox(width: 16),
@@ -407,13 +409,19 @@ class _DetailsBottomSheetState extends State<DetailsBottomSheet> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // صورة المنتج
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(22),
-                  child: Image.asset(
-                    widget.prod.image,
-                    height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.lightGreen , width: 3)
+                        ,borderRadius: BorderRadius.circular(22)
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(22),
+                    child: Image.asset(
+                      widget.prod.image,
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -517,7 +525,7 @@ class _DetailsBottomSheetState extends State<DetailsBottomSheet> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text("Price",
+                        Text(" Total Price",
                             style: TextStyle(
                                 color:
                                     (widget.prod.category.toString() == "veg")
@@ -555,24 +563,12 @@ class _DetailsBottomSheetState extends State<DetailsBottomSheet> {
 
                 const SizedBox(height: 24),
 
-                // وصف ثابت
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text("description",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  "we produce fresh carrots and sell it from the field:\n"
-                  "• standard-sized carrots\n"
-                  "• Abaco F1 super sweet hybrid\n"
-                  "• rich colour",
-                  style: TextStyle(color: Colors.grey),
-                ),
+   
+
 
                 const SizedBox(height: 24),
 
-                // زر إضافة إلى السلة
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

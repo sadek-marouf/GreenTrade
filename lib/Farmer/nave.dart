@@ -11,15 +11,12 @@ import 'Bloc/Farmer_bloc/Product/products_bloc.dart';
 import 'Products/addproduct.dart';
 import 'Service/repositories/products_repository.dart';
 
-
-
-
 class AnimatedNavBarPageWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final repository = ProductsRepository(http.Client());
 
-    return  MultiBlocProvider(
+    return MultiBlocProvider(
       providers: [
         BlocProvider<ProductsBloc>(
           create: (_) => ProductsBloc(repository),
@@ -43,11 +40,11 @@ class AnimatedNavBarPage extends StatefulWidget {
   _AnimatedNavBarPageState createState() => _AnimatedNavBarPageState();
 }
 
-class _AnimatedNavBarPageState extends State<AnimatedNavBarPage> with SingleTickerProviderStateMixin {
+class _AnimatedNavBarPageState extends State<AnimatedNavBarPage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
   int _selectedIndex = 0;
-
 
   final List<Widget> _pages = [
     FarmerHomePage(),
@@ -66,7 +63,7 @@ class _AnimatedNavBarPageState extends State<AnimatedNavBarPage> with SingleTick
 
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(0.0, 1.0), // خارج الشاشة من الأسفل
-      end: Offset.zero,              // إلى مكانه الطبيعي
+      end: Offset.zero, // إلى مكانه الطبيعي
     ).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOut,
@@ -92,23 +89,33 @@ class _AnimatedNavBarPageState extends State<AnimatedNavBarPage> with SingleTick
     return Scaffold(
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
-        backgroundColor: const Color(0xFFA8E6A1), // Light green
-        onPressed: () {
-          final productsBloc = BlocProvider.of<ProductsBloc>(context);
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (context) {
-              return BlocProvider.value(
-                value: productsBloc,
-                child: AddProductModal(),
-              );
-            },
-          );
-        },
-        child: const Icon(Icons.add),
-      )
+              backgroundColor: const Color(0xFFA8E6A1), // Light green
+              onPressed: ()async {
+
+                final productsBloc = BlocProvider.of<ProductsBloc>(context);
+                final result = await showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) {
+                    return BlocProvider.value(
+                      value: productsBloc,
+                      child: AddProductModal(),
+                    );
+                  },
+                );
+
+                if (result == true) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('✅ تمت إضافة المنتج بنجاح'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              },
+              child: const Icon(Icons.add),
+            )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: _pages[_selectedIndex],
@@ -134,7 +141,8 @@ class _AnimatedNavBarPageState extends State<AnimatedNavBarPage> with SingleTick
                   iconSize: 30,
                   onPressed: () => _onItemTapped(1),
                 ),
-                SizedBox(width: _selectedIndex == 0 ? 48 : 0), // مساحة الزر الأوسط
+                SizedBox(width: _selectedIndex == 0 ? 48 : 0),
+                // مساحة الزر الأوسط
                 IconButton(
                   icon: Icon(Icons.article),
                   iconSize: 30,

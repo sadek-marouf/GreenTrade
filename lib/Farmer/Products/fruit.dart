@@ -17,6 +17,7 @@ class Fruits extends StatefulWidget {
   State<Fruits> createState() => _FruitsState();
 }
 
+
 class _FruitsState extends State<Fruits> {
   @override
   Widget build(BuildContext context) {
@@ -25,8 +26,11 @@ class _FruitsState extends State<Fruits> {
       if (state is ViewProductLoading) {
         return Center(child: CircularProgressIndicator());
       } else if (state is ViewProductLoaded) {
+
+
         final fruits =
-            state.Get_products.where((p) => p.category == 'fruit').toList();
+            state.Get_products.where((p) => p.category.toString() == 'fruit').toList();
+
         return AnimationLimiter(
           child: GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -62,7 +66,8 @@ class _FruitsState extends State<Fruits> {
                               final repo = ProductsRepository(client);
                               return BlocProvider(
                                 create: (_) => EditProductBloc(repo),
-                                child: DetailsBottomSheet(prod: fruits[index]),
+                                child: DetailsBottomSheet(
+                                    prod: fruits[index]),
                               );
                             },
                           );
@@ -75,12 +80,19 @@ class _FruitsState extends State<Fruits> {
                               Expanded(
                                 child: Stack(
                                   children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Image.asset(
-                                        fruits[index].image,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(12),
+                                          border:  Border.all(color: Colors.lightGreen,width: 2)
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.network(
+                                          fruits[index].image,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
+                                        ),
                                       ),
                                     ),
                                     if (fruits[index].discount != null &&
@@ -94,7 +106,7 @@ class _FruitsState extends State<Fruits> {
                                           decoration: BoxDecoration(
                                             color: Colors.redAccent,
                                             borderRadius:
-                                                BorderRadius.circular(6),
+                                            BorderRadius.circular(6),
                                           ),
                                           child: Text(
                                             '-${fruits[index].discount!.toInt()}%',
@@ -108,12 +120,12 @@ class _FruitsState extends State<Fruits> {
                                   ],
                                 ),
                               ),
-                              Text(fruits[index].name,
+                              Text("  ${fruits[index].name}",
                                   style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w500)),
                               SizedBox(height: 10),
-                              Text('Quantity: ${fruits[index].quantity}',
+                              Text(' Quantity: ${fruits[index].quantity}',
                                   style: TextStyle(
                                       fontSize: 15, color: Colors.black)),
                               SizedBox(height: 5),
@@ -130,9 +142,13 @@ class _FruitsState extends State<Fruits> {
               );
             },
           ),
-        );
+        );;
+      } else if (state is ViewProductError) {
+        print("${state.message}");
+        return Center(child: Text("Error: ${state.message}"));
       } else {
-        return Text("data");
+
+        return Center(child: Text("Unexpected state"));
       }
     });
   }

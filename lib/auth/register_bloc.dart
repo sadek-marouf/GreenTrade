@@ -31,7 +31,7 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
       String city = prefs.getString('City') ?? '';
       String village = prefs.getString('Village') ?? '';
 
-      var url = Uri.parse("https://7c798e618e6b5601c7c9b354e769f139.serveo.net/api/register"); // API
+      var url = Uri.parse("http://192.168.21.169:8000/api/register"); // API
 
       var response = await http.post(
         url,

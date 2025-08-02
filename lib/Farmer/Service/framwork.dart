@@ -144,85 +144,105 @@ class Product {
 
 }
 ///////////////////
-
-class Products {
-
-  final String category ;
-  final String name;
-  final double price;
-  final double quantity;
-  final double? discount;
-  final String image;
-
-
-  Products({
-
-    required this.category,
-    required this.name,
-    required this.price,
-    required this.quantity,
-    required this.discount,
-    required this.image,
-  });
-  factory Products.fromjson(Map<String,dynamic>json){
-    return Products(
-
-      category: json['catecory'],
-      name: json['name'],
-      price: json['price'],
-      quantity: json['quantity'],
-      discount: json['discount'],
-      image: json['image']
-
-    ) ;
-  }
-
-
-
-
-
-
-}
-///////////////////
+//
+// class Products {
+//
+//   final String category ;
+//   final String name;
+//   final double price;
+//   final double quantity;
+//   final double? discount;
+//   final String image;
+//
+//
+//   Products({
+//
+//     required this.category,
+//     required this.name,
+//     required this.price,
+//     required this.quantity,
+//     required this.discount,
+//     required this.image,
+//   });
+//   factory Products.fromjson(Map<String,dynamic>json){
+//     return Products(
+//
+//       category: json['catecory'],
+//       name: json['name'],
+//       price: json['price'],
+//       quantity: json['quantity'],
+//       discount: json['discount'],
+//       image: json['image']
+//
+//     ) ;
+//   }
+//
+//
+//
+//
+//
+//
+// }
 
 class Get_Products {
-
-  final   category ;
-  final int id ;
+  final String category ;
+  final int id;
   final String name;
   final double price;
   final double quantity;
   final double? discount;
   final String image;
 
-
-  Get_Products({
-
+  Get_Products( {
     required this.category,
-    required this.id ,
+    required this.id,
     required this.name,
     required this.price,
     required this.quantity,
     required this.discount,
     required this.image,
   });
-  factory Get_Products.fromjson(Map<String,dynamic>json){
+
+  factory Get_Products.fromJson(Map<String, dynamic> json) {
+    final rawUrl = json['url']?.toString() ?? '';
+    final imageUrl = rawUrl.startsWith('http')
+        ? rawUrl
+        : "http://10.154.48.169:8000/$rawUrl";
+    print("Raw URL: $rawUrl");
+    print("Final image URL: $imageUrl");
     return Get_Products(
+      id: json['id'],
+      name: json['name'].toString(),
+      category: json['category'],
+      price: double.tryParse(json['total_price'].toString()) ?? 0.0,
+      quantity: double.tryParse(json['quantity'].toString()) ?? 0.0,
+      discount: json['discount'] != null
+          ? double.tryParse(json['discount'].toString())
+          : null,
+      image: json['url'] != null && json['url'].toString().isNotEmpty
+          ? "${json['url']}"
+          : "https://via.placeholder.com/150",
 
-        category: json['category'],
-        id: json['id'],
-        name: json['name'],
-        price: json['price'],
-        quantity: json['quantity'],
-        discount: json['discount'],
-        image: json['image']
-
-    ) ;
+    )
+    ;
   }
+}
+class Prdbycategory {
+  final String category;
+  final String name;
+  final String image;
 
+  Prdbycategory({
+    required this.name,
+    required this.image,
+    required this.category,
+  });
 
-
-
-
-
+  factory Prdbycategory.fromJson(Map<String, dynamic> json) {
+    return Prdbycategory(
+      category: json['category_name'] ?? '',
+      name: json['product_name'] ?? '',
+      image: json['image'] ?? '',
+    );
+  }
 }

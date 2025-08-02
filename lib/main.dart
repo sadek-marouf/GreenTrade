@@ -11,11 +11,12 @@ import 'package:farm1/welcom/pagetwo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'Farmer/farmerdashbord.dart';
+
 import 'Farmer/nave.dart';
 import 'Farmer/profile.dart';
-import 'Trader/homepage.dart';
+
 import 'Trader/nav_tra.dart';
+import 'Trader/visitfarmer.dart';
 import 'auth/login.dart';
 import 'auth/register.dart';
 import 'auth/register_bloc.dart';
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
     child :
 
       MaterialApp(
-        home:AnimatedNavBarPageTrader(),
+        home:LoginPage(),
 
 
         routes: {
@@ -52,6 +53,7 @@ class MyApp extends StatelessWidget {
           'register': (context) => const RegisterPage(),
           'welcome' : (context) => FarmerHomePage(),
           'select' : (context) => HomePageSelect(),
+          'nav' : (context) => AnimatedNavBarPageWrapper() ,
 
 
           'profile' : (context) => const ProfileScreen() ,

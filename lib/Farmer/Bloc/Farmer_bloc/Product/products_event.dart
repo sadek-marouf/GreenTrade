@@ -6,13 +6,16 @@ class fetchProducts extends ProductsEvent{
   final String category ;
    fetchProducts(this.category);
 }
+class ResetAddProductState extends ProductsEvent {}
+
 class Addproduct extends ProductsEvent{
 
 
   final String id_category ;
 
   final String name_product ;
-  final double price ;
+  final double priceofkilo ;
+
   final double quantity ;
   final int?  discount ;
   final File? image ;
@@ -21,7 +24,7 @@ class Addproduct extends ProductsEvent{
     required this.id_category,
 
     required this.name_product,
-    required this.price,
+    required this.priceofkilo,
     required this.quantity,
     required this.image,
     this.discount,

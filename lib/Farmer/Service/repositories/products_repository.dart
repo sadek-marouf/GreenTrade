@@ -16,44 +16,58 @@ class ProductsRepository {
   final http.Client client;
   ProductsRepository(this.client);
 
-  Future<List<Product>> fetchByCategory(String category) async {
+  Future<List<Prdbycategory>> fetchProductNamesByType(String type) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    final url = Uri.parse('https://yourdomain.com/api/products?category=$category');
-    final res = await client.get(url , headers: {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    });
+    final url = Uri.parse('http://10.154.48.169:8000/api/categories-by-type');
 
-    if (res.statusCode == 201) {
+    final res = await client.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'type': type}),
+    );
 
-      final list = jsonDecode(res.body) as List;
-      return list.map((e) => Product.fromJson(e)).toList();
+    print('📬 Response status: ${res.statusCode}');
+    print('📦 Response body: ${res.body}');
+
+
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      print('📦 Response body: ${res.body}');
+      final List productsJson = data['products'];
+
+      return productsJson.map((e) => Prdbycategory.fromJson(e)).toList();
     } else {
-      throw Exception('Failed to load products');
+      throw Exception('Failed to load product names');
     }
   }
+
   Future<void> addProduct({
     required String idCategory,
 
     required String nameProduct,
-    required double price,
+    required double priceofkilo,
+
     required double quantity,
     required File image,
     int? discount,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    final uri = Uri.parse('https://example.com/api/add_product') ;
+    final uri = Uri.parse('http://10.154.48.169:8000/api/product/create') ;
 
 
     final request = http.MultipartRequest('POST', uri ) ;
     request.headers['Authorization'] = 'Bearer $token';
 
-    request.fields['id_category'] = idCategory;
+    request.fields['category'] = idCategory;
 
-    request.fields['name_product'] = nameProduct;
-    request.fields['price'] = price.toString();
+    request.fields['name'] = nameProduct;
+    request.fields['price_of_kilo'] = priceofkilo.toString();
+
     request.fields['quantity'] = quantity.toString();
 
     if (discount != null) {
@@ -72,8 +86,11 @@ class ProductsRepository {
     request.files.add(multipartFile);
     final response = await request.send();
 
-    if (response.statusCode != 200) {
+    if (response.statusCode != 201) {
+      print('📬 Response status: ${response.statusCode}');
+
       throw Exception('Failed to add product');
+
     }
   }
   Future<Get_Products> GetIdProduct (
@@ -88,7 +105,7 @@ class ProductsRepository {
     });
     if(response.statusCode == 200){
       final data = jsonDecode(response.body) ;
-      return Get_Products.fromjson(data) ;
+      return Get_Products.fromJson(data) ;
     }
     else{throw Exception('Failed to load product');}
   }
@@ -102,7 +119,7 @@ class ProductsRepository {
     required File image,
     double? discount,
   }) async {
-    final uri = Uri.parse('https://example.com/api/add_product' );
+    final uri = Uri.parse('http://192.168.21.169:8000/api/add_product' );
 
     final request = http.MultipartRequest('POST', uri );
     request.fields['id_category'] = idCategory;
@@ -135,7 +152,7 @@ class ProductsRepository {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     // مثال استدعاء HTTP لحذف المنتج
-    final response = await http.delete(Uri.parse('https://api.example.com/products/$id'),headers: {
+    final response = await http.delete(Uri.parse('http://192.168.21.169:8000/products/$id'),headers: {
       'Authorization': 'Bearer $token',
       'Content-Type': 'application/json',
     });
