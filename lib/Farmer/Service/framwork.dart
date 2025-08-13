@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -143,46 +144,6 @@ class Product {
   }
 
 }
-///////////////////
-//
-// class Products {
-//
-//   final String category ;
-//   final String name;
-//   final double price;
-//   final double quantity;
-//   final double? discount;
-//   final String image;
-//
-//
-//   Products({
-//
-//     required this.category,
-//     required this.name,
-//     required this.price,
-//     required this.quantity,
-//     required this.discount,
-//     required this.image,
-//   });
-//   factory Products.fromjson(Map<String,dynamic>json){
-//     return Products(
-//
-//       category: json['catecory'],
-//       name: json['name'],
-//       price: json['price'],
-//       quantity: json['quantity'],
-//       discount: json['discount'],
-//       image: json['image']
-//
-//     ) ;
-//   }
-//
-//
-//
-//
-//
-//
-// }
 
 class Get_Products {
   final String category ;
@@ -191,6 +152,7 @@ class Get_Products {
   final double price;
   final double quantity;
   final double? discount;
+  final String? description;
   final String image;
 
   Get_Products( {
@@ -200,6 +162,7 @@ class Get_Products {
     required this.price,
     required this.quantity,
     required this.discount,
+    required this.description,
     required this.image,
   });
 
@@ -207,7 +170,7 @@ class Get_Products {
     final rawUrl = json['url']?.toString() ?? '';
     final imageUrl = rawUrl.startsWith('http')
         ? rawUrl
-        : "http://10.154.48.169:8000/$rawUrl";
+        : "http://$ip:8000/storage/$rawUrl";
     print("Raw URL: $rawUrl");
     print("Final image URL: $imageUrl");
     return Get_Products(
@@ -216,12 +179,12 @@ class Get_Products {
       category: json['category'],
       price: double.tryParse(json['total_price'].toString()) ?? 0.0,
       quantity: double.tryParse(json['quantity'].toString()) ?? 0.0,
+      description: json['description'],
       discount: json['discount'] != null
           ? double.tryParse(json['discount'].toString())
           : null,
-      image: json['url'] != null && json['url'].toString().isNotEmpty
-          ? "${json['url']}"
-          : "https://via.placeholder.com/150",
+      image: imageUrl.isNotEmpty ? imageUrl : "https://via.placeholder.com/150",
+
 
     )
     ;
@@ -246,3 +209,36 @@ class Prdbycategory {
     );
   }
 }
+class UpdateProductModel {
+  final int id; // لازم لإرسال المعرف
+  final String? idCategory;
+  final String? name;
+  final double? price;
+  final double? quantity;
+  final double? discount;
+  final File? image;
+
+  UpdateProductModel({
+    required this.id,
+    this.idCategory,
+    this.name,
+    this.price,
+    this.quantity,
+    this.discount,
+    this.image,
+  });
+
+  // تحويل البيانات إلى Map مع حذف القيم null (حتى لا ترسلها)
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    if (idCategory != null) data['idCategory'] = idCategory;
+    if (name != null) data['name'] = name;
+    if (price != null) data['price'] = price;
+    if (quantity != null) data['quantity'] = quantity;
+    if (discount != null) data['discount'] = discount;
+    // الصورة تحتاج تعامل خاص لأنها File مش نص عادي
+    return data;
+  }
+}
+
+String ip = "10.39.131.169" ;

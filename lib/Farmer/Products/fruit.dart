@@ -33,6 +33,7 @@ class _FruitsState extends State<Fruits> {
 
         return AnimationLimiter(
           child: GridView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 8.0,
@@ -87,6 +88,7 @@ class _FruitsState extends State<Fruits> {
                                       ),
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(12),
+
                                         child: Image.network(
                                           fruits[index].image,
                                           width: double.infinity,

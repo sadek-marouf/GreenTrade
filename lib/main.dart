@@ -1,6 +1,8 @@
 
+import 'package:farm1/Trader/serch.dart';
 import 'package:farm1/WelcomPage.dart';
 import 'package:farm1/auth/homepageselect.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 
 
@@ -15,7 +17,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'Farmer/nave.dart';
 import 'Farmer/profile.dart';
 
+import 'Trader/homepage.dart';
 import 'Trader/nav_tra.dart';
+import 'Trader/test.dart';
 import 'Trader/visitfarmer.dart';
 import 'auth/login.dart';
 import 'auth/register.dart';
@@ -42,6 +46,16 @@ class MyApp extends StatelessWidget {
     child :
 
       MaterialApp(
+        locale: const Locale('ar'), // تعيين اللغة للعربية
+        supportedLocales: const [
+          Locale('ar'), // العربية
+          Locale('en'), // الإنكليزية (اختياري)
+        ],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         home:LoginPage(),
 
 
@@ -51,12 +65,13 @@ class MyApp extends StatelessWidget {
           'page three' :(context) => const Pagethree(),
           'login': (context) => const LoginPage(),
           'register': (context) => const RegisterPage(),
-          'welcome' : (context) => FarmerHomePage(),
+
           'select' : (context) => HomePageSelect(),
           'nav' : (context) => AnimatedNavBarPageWrapper() ,
-
-
+           'nav_t' : (context) => NavBarPageTrader() ,
           'profile' : (context) => const ProfileScreen() ,
+          'home_t': (context) => TraderProductsPage() ,
+          'serch': (context) => Bserch()
          },
       )
     ) ;

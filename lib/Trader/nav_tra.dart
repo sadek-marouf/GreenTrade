@@ -1,6 +1,8 @@
 
-import 'package:farm1/Trader/Service/repositories/Trader_Repo.dart';
-import 'package:farm1/Trader/Trader_Bloc/getproductfarmer/get_list_product_bloc.dart';
+import 'package:farm1/Farmer/Service/repositories/products_repository.dart';
+import 'package:farm1/Trader/Trader_Bloc/farmers_bloc.dart';
+import 'package:farm1/Trader/Trader_Bloc/getproductfarmer/visitfarmer_bloc.dart';
+
 import 'package:farm1/Trader/homepage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,13 +11,15 @@ import 'package:http/http.dart' as http;
 
 
 class NavBarPageTrader extends StatelessWidget {
-  const NavBarPageTrader({super.key});
+  final repository = ProductsRepository(http.Client());
+ NavBarPageTrader({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final repo = TraderRepo(http.Client()) ;
+
     return MultiBlocProvider(providers: [
-      BlocProvider<GetListProductBloc>(create: (_) => GetListProductBloc(repo) )
+      BlocProvider<FarmersBloc>(create: (_) => FarmersBloc() ),
+      BlocProvider<VisitfarmerBloc>(create: (_) => VisitfarmerBloc(repository))
 
     ], child: Builder(builder: (context){
       return AnimatedNavBarPageTrader() ;

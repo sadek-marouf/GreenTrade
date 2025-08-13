@@ -1,284 +1,210 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-
+import '../Trader/veg.dart';
+import '../Trader/tfruit.dart';
+import 'Trader_Bloc/getproductfarmer/visitfarmer_bloc.dart';
 
 class FarmerDetailsPage extends StatelessWidget {
-  final farmer = {
-    'name': 'Ahmad Al-Farmer',
-    'phone': '+963987654321',
-    'email': 'ahmad@example.com',
-    'location': 'Latakia, Syria',
-    'image': 'https://i.imgur.com/BoN9kdC.png',
-  };
-
-  final List<Map<String, dynamic>> products = [
-    {
-      'name': 'Tomatoes',
-      'price': 300,
-      'oldPrice': 400,
-      'type': 'vegetable',
-      'image': 'https://i.imgur.com/FHMnsV0.jpg',
-    },
-    {
-      'name': 'Potatoes',
-      'price': 200,
-      'oldPrice': null,
-      'type': 'vegetable',
-      'image': 'https://i.imgur.com/xAuhNjK.jpg',
-    },
-    {
-      'name': 'Cucumbers',
-      'price': 250,
-      'oldPrice': null,
-      'type': 'vegetable',
-      'image': 'https://i.imgur.com/65Q5xkR.jpg',
-    },
-    {
-      'name': 'Apples',
-      'price': 500,
-      'oldPrice': 600,
-      'type': 'fruit',
-      'image': 'https://i.imgur.com/QxCpF5l.jpg',
-    },
-    {
-      'name': 'Bananas',
-      'price': 350,
-      'oldPrice': null,
-      'type': 'fruit',
-      'image': 'https://i.imgur.com/PKpZP0s.jpg',
-    },
-  ];
+  final int farmerId;
+  const FarmerDetailsPage({super.key, required this.farmerId});
 
   @override
   Widget build(BuildContext context) {
-    final discounted =
-    products.where((p) => p['oldPrice'] != null).toList();
-
-    final vegetables =
-    products.where((p) => p['type'] == 'vegetable').toList();
-    final fruits =
-    products.where((p) => p['type'] == 'fruit').toList();
-
     return Scaffold(
-      backgroundColor: Colors.lightGreen.shade200,
+      backgroundColor:   Colors.lightGreen.shade200, // خليت الخلفية بيضاء مثل الواجهة
       appBar: AppBar(
-        title: Text('Farmer Details'),
-        backgroundColor: Colors.green.shade700,
+        title: const Text("المزارع"),
+        backgroundColor: Colors.lightGreen,
+        elevation: 0,
+        foregroundColor: Colors.black,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // ------------ Farmer Info ------------
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Card(
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage: NetworkImage(farmer['image']!),
-                      ),
-                      SizedBox(height: 10),
-                      Text(farmer['name']!,
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.phone, size: 16),
-                          SizedBox(width: 5),
-                          Text(farmer['phone']!),
-                          IconButton(
-                            icon: Icon(Icons.call),
-                            onPressed: () {
+      body: BlocBuilder<VisitfarmerBloc, VisitfarmerState>(
+        builder: (context, state) {
+          if (state is VisitfarmerLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is VisitfarmerError) {
+            return Center(child: Text('Error: ${state.Message}'));
+          }
+          if (state is VisitfarmerLoaded) {
+            final farmer = state.farmer;
+            final discounted = farmer.products.where((p) => p.discount > 0).toList();
+            final vegetables = farmer.products.where((p) => p.category.toLowerCase() == 'vegetable').toList();
+            final fruits = farmer.products.where((p) => p.category.toLowerCase() == 'fruit').toList();
 
-                            },
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ------------ Farmer Info -------------
+                  Container(
+                      padding: const EdgeInsets.all(16.0),
+                      margin: EdgeInsets.symmetric(horizontal: 25,vertical: 10),
+
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(25),color: Colors.white,),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 45,
+                            backgroundImage: NetworkImage(
+                              farmer.products.isNotEmpty && farmer.products.first.url != null
+                                  ? farmer.products.first.url!
+                                  : "https://i.imgur.com/BoN9kdC.png",
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "${farmer.firstName} ${farmer.lastName}",
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.phone, size: 18, color: Colors.green),
+                                    const SizedBox(width: 6),
+                                    Text(farmer.phone, style: const TextStyle(fontSize: 16)),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.email, size: 18, color: Colors.green),
+                                    const SizedBox(width: 6),
+                                    Text(farmer.email, style: const TextStyle(fontSize: 16)),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.location_on, size: 18, color: Colors.green),
+                                    const SizedBox(width: 6),
+                                    Text("${farmer.city} ${farmer.governorate ?? ''}", style: const TextStyle(fontSize: 16)),
+                                  ],
+                                ),
+                              ],
+                            ),
                           )
                         ],
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                   
+                  ),
+
+                  // ------------ Discounted ------------
+                  if (discounted.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Icon(Icons.email, size: 16),
-                          SizedBox(width: 5),
-                          Text(farmer['email']!),
+                          Text(
+                            ' العروض 🔥',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade900,
+                            ),
+                          ),
+                          MaterialButton(onPressed: (){},child: Text("عرض الكل" ,style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green.shade900,
+                          )))
                         ],
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.location_on, size: 16),
-                          SizedBox(width: 5),
-                          Text(farmer['location']!),
-                        ],
+                    ),
+                  if (discounted.isNotEmpty)
+                    CarouselSlider(
+                      options: CarouselOptions(
+                        height: 250,
+                        viewportFraction: 0.85,
+                        enlargeCenterPage: true,
+                        autoPlay: true,
+                        autoPlayInterval: const Duration(seconds: 4),
                       ),
+                      items: discounted.map((product) {
+                        final discountedPrice = (product.priceOfKilo * (1 - product.discount / 100));
+                        return Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          margin: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipRRect(
+                                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                child: Image.network(
+                                  product.url ?? '',
+                                  width: double.infinity,
+                                  height: 150,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Image.network('https://i.imgur.com/BoN9kdC.png', fit: BoxFit.cover, height: 150, width: double.infinity),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(product.name,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold, fontSize: 18)),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '${product.priceOfKilo} SYP',
+                                          style: const TextStyle(
+                                            decoration: TextDecoration.lineThrough,
+                                            fontSize: 16,
+                                            color: Colors.red,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          '${discountedPrice.toStringAsFixed(0)} SYP',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            color: Colors.green.shade800,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  TabBarView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      Container(color: Colors.transparent, child: Vegetables(products:vegetables,)),
+                      Container(color: Colors.transparent, child: Fruits(products: fruits,)),
                     ],
                   ),
-                ),
-              ),
-            ),
 
-            // ------------ Discounted Products Slider ------------
-            if (discounted.isNotEmpty)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text('🔥 Discounted Products',
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green.shade900)),
-                  ),
-                  CarouselSlider(
-                    options: CarouselOptions(
-                      height: 220,
-                      viewportFraction: 1.0,
-                      autoPlay: true,
-                      autoPlayInterval: Duration(seconds: 3),
-                      enlargeCenterPage: false,
-                    ),
-                    items: discounted.map((product) {
-                      return Builder(
-                        builder: (BuildContext context) {
-                          return Card(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                            margin: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            child: Column(
-                              children: [
-                                Expanded(
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(12)),
-                                    child: Image.network(
-                                      product['image'] as String,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    children: [
-                                      Text(product['name'] as String,
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16)),
-                                      Text.rich(TextSpan(children: [
-                                        TextSpan(
-                                            text:
-                                            '${product['oldPrice']} SYP  ',
-                                            style: TextStyle(
-                                                decoration:
-                                                TextDecoration.lineThrough,
-                                                color: Colors.red)),
-                                        TextSpan(
-                                            text: '${product['price']} SYP',
-                                            style: TextStyle(
-                                                color: Colors.green.shade800)),
-                                      ])),
-                                    ],
-                                  ),
-                                )
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
 
-            // ------------ Vegetables Section ------------
-            if (vegetables.isNotEmpty)
-              buildProductSection(title: '🥦 Vegetables', list: vegetables),
 
-            // ------------ Fruits Section ------------
-            if (fruits.isNotEmpty)
-              buildProductSection(title: '🍎 Fruits', list: fruits),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buildProductSection({
-    required String title,
-    required List<Map<String, dynamic>> list,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding:
-          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-          child: Text(title,
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green.shade900)),
-        ),
-        GridView.builder(
-          itemCount: list.length,
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.75,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10),
-          itemBuilder: (context, index) {
-            final product = list[index];
-            return Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(12)),
-                      child: Image.network(
-                        product['image'] as String,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        Text(product['name'] as String,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16)),
-                        SizedBox(height: 4),
-                        Text('${product['price']} SYP',
-                            style: TextStyle(
-                                color: Colors.green.shade800,
-                                fontWeight: FontWeight.w500)),
-                      ],
-                    ),
-                  )
                 ],
               ),
             );
-          },
-        ),
-      ],
+          }
+          return const SizedBox();
+        },
+      ),
     );
   }
 }

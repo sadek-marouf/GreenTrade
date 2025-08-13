@@ -4,7 +4,6 @@ import 'package:http/http.dart';
 
 import 'dart:async';
 
-
 import 'Farmer/Bloc/Farmer_bloc/Edit_product/edit_product_bloc.dart';
 import 'Farmer/Bloc/Farmer_bloc/ViewProduct/viewproduct_bloc.dart';
 import 'Farmer/Products/EditeProduct.dart';
@@ -29,7 +28,7 @@ class _FarmerHomePageState extends State<FarmerHomePage> {
   void initState() {
     super.initState();
     _pageController = PageController(viewportFraction: 0.9);
-
+    context.read<ViewproductBloc>().add(GetProducts());
   }
 
   @override
@@ -37,6 +36,23 @@ class _FarmerHomePageState extends State<FarmerHomePage> {
     _pageTimer?.cancel();
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _refreshProducts(BuildContext context) async {
+    print("🔄 Refresh started");
+    final completer = Completer();
+
+    final subscription = context.read<ViewproductBloc>().stream.listen((state) {
+      if (state is ViewProductLoaded || state is ViewProductError) {
+        completer.complete();
+      }
+    });
+
+    context.read<ViewproductBloc>().add(RefreshProducts());
+
+    await completer.future;
+    await subscription.cancel();
+    print("✅ Refresh complete");
   }
 
   void startAutoScroll(int itemCount) {
@@ -60,214 +76,190 @@ class _FarmerHomePageState extends State<FarmerHomePage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return BlocProvider(
-      create: (context) => ViewproductBloc()..add(GetProducts()),
-      child: Container(
-        color: Colors.lightGreen.shade200,
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(kToolbarHeight + 20),
-            child: ClipRRect(
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(24),
-              ),
-              child: AppBar(
-                backgroundColor: Colors.lightGreen[500],
-                elevation: 6,
-                shadowColor: Colors.greenAccent.shade100,
-                actions: [
-                  Icon(Icons.shopping_cart,
-                      color: Colors.white.withOpacity(0.9)),
-                  SizedBox(width: 20),
-                  Icon(Icons.notifications,
-                      color: Colors.white.withOpacity(0.9)),
-                  SizedBox(width: 10),
-                ],
-              ),
+    return Container(
+      color: Colors.lightGreen.shade200,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight + 20),
+          child: ClipRRect(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(24),
+            ),
+            child: AppBar(
+              backgroundColor: Colors.lightGreen[500],
+              elevation: 6,
+              shadowColor: Colors.greenAccent.shade100,
+              actions: [
+                Icon(Icons.shopping_cart, color: Colors.white.withOpacity(0.9)),
+                SizedBox(width: 20),
+                Icon(Icons.notifications, color: Colors.white.withOpacity(0.9)),
+                SizedBox(width: 10),
+              ],
             ),
           ),
-          drawer: Container(),  
-          body: DefaultTabController(
+        ),
+        drawer: Container(),
+        body: RefreshIndicator(
+          onRefresh: () => _refreshProducts(context),
+          // أضف physics هنا أيضاً للتأكد من إمكانية السحب دوماً
+          child: DefaultTabController(
             length: 2,
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.lightGreen.shade200,
               ),
               child: NestedScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),  // لازم حتى لو المحتوى صغير يسمح بالسحب
                 headerSliverBuilder: (context, innerBoxIsScrolled) {
                   return [
                     SliverToBoxAdapter(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: size.height * 0.02),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Text(
-                              "Your Deals",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 24,
-                                color: Colors.green.shade900,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(height: size.height * 0.02),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              child: Text(
+                                "Your Deals",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 24,
+                                  color: Colors.green.shade900,
+                                ),
                               ),
                             ),
-                          ),
-                          BlocBuilder<ViewproductBloc, ViewproductState>(
-                            builder: (context, state) {
-                              if (state is ViewProductLoaded) {
-                                final discountedProducts =
-                                    state.Get_products.where((p) =>
-                                        p.discount != null &&
-                                        p.discount! > 0).toList();
+                            BlocBuilder<ViewproductBloc, ViewproductState>(
+                              builder: (context, state) {
+                                if (state is ViewProductLoaded) {
+                                  final discountedProducts = state.Get_products.where((p) => p.discount != null && p.discount! > 0).toList();
 
-                                startAutoScroll(discountedProducts.length);
+                                  startAutoScroll(discountedProducts.length);
 
-                                return SizedBox(
-                                  height: size.height * 0.17,
-                                  child: PageView.builder(
-                                    controller: _pageController,
-                                    itemCount: discountedProducts.length,
-                                    itemBuilder: (context, index) {
-                                      final prod = discountedProducts[index];
-                                      return GestureDetector(
-                                        onTap: () {
-                                          showModalBottomSheet(
-                                            context: context,
-                                            isScrollControlled: true,
-                                            shape: const RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.vertical(
-                                                top: Radius.circular(24),
+                                  return SizedBox(
+                                    height: size.height * 0.17,
+                                    child: PageView.builder(
+                                      controller: _pageController,
+                                      itemCount: discountedProducts.length,
+                                      itemBuilder: (context, index) {
+                                        final prod = discountedProducts[index];
+                                        return GestureDetector(
+                                          onTap: () {
+                                            showModalBottomSheet(
+                                              context: context,
+                                              isScrollControlled: true,
+                                              shape: const RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                                               ),
-                                            ),
-                                            builder: (context) {
-                                              final client = Client();
-                                              final repo =
-                                                  ProductsRepository(client);
-                                              return BlocProvider(
-                                                create: (_) => EditProductBloc(
-                                                    repo)
-                                                  ..add(GetIdProduct(prod.id)),
-                                                child: DetailsBottomSheet(
-                                                    prod: prod),
-                                              );
-                                            },
-                                          );
-                                        },
-                                        child: Container(
-                                          margin: const EdgeInsets.symmetric(
-                                              horizontal: 12, vertical: 8),
-                                          decoration: BoxDecoration(
-                                            color: Colors.lightGreen.shade400,
-                                            borderRadius:
-                                                BorderRadius.circular(16),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.green.shade200
-                                                    .withOpacity(0.6),
-                                                blurRadius: 8,
-                                                offset: Offset(0, 3),
-                                              ),
-                                            ],
-                                          ),
-                                          padding: const EdgeInsets.all(12),
-                                          child: Row(
-                                            children: [
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                                child: Image.network(
-                                                  prod.image,
-                                                  width: 120,
-                                                  height: size.height * 0.15,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
+                                              builder: (context) {
+                                                final client = Client();
+                                                final repo = ProductsRepository(client);
+                                                return BlocProvider(
+                                                  create: (_) => EditProductBloc(repo)..add(GetIdProduct(prod.id)),
+                                                  child: DetailsBottomSheet(prod: prod),
+                                                );
+                                              },
+                                            );
+                                          },
+                                          child: Container(
+                                            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.lightGreen.shade400,
+                                              borderRadius: BorderRadius.circular(16),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.green.shade200.withOpacity(0.6),
+                                                  blurRadius: 8,
+                                                  offset: Offset(0, 3),
                                                 ),
-                                              ),
-                                              const SizedBox(width: 16),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    Text(
-                                                      prod.name,
-                                                      style: const TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.white,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                    const SizedBox(height: 6),
-                                                    Text(
-                                                      'Price: \$${prod.price}',
-                                                      style: const TextStyle(
-                                                        fontSize: 16,
-                                                        color: Colors.white70,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 6),
-                                                    Container(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          horizontal: 8,
-                                                          vertical: 3),
-                                                      decoration: BoxDecoration(
-                                                        color:
-                                                            Colors.red.shade700,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(8),
-                                                      ),
-                                                      child: Text(
-                                                        '-${prod.discount!.toInt()}% OFF',
+                                              ],
+                                            ),
+                                            padding: const EdgeInsets.all(12),
+                                            child: Row(
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  child: Image.network(
+                                                    prod.image,
+                                                    width: 120,
+                                                    height: size.height * 0.15,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 16),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: [
+                                                      Text(
+                                                        prod.name,
                                                         style: const TextStyle(
+                                                          fontSize: 20,
+                                                          fontWeight: FontWeight.bold,
                                                           color: Colors.white,
-                                                          fontWeight:
-                                                              FontWeight.bold,
+                                                        ),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                      const SizedBox(height: 6),
+                                                      Text(
+                                                        'Price: \$${prod.price}',
+                                                        style: const TextStyle(
+                                                          fontSize: 16,
+                                                          color: Colors.white70,
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
+                                                      const SizedBox(height: 6),
+                                                      Container(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.red.shade700,
+                                                          borderRadius: BorderRadius.circular(8),
+                                                        ),
+                                                        child: Text(
+                                                          '-${prod.discount!.toInt()}% OFF',
+                                                          style: const TextStyle(
+                                                            color: Colors.white,
+                                                            fontWeight: FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                              const Icon(Icons.chevron_right,
-                                                  color: Colors.white,
-                                                  size: 28),
-                                            ],
+                                                const Icon(Icons.chevron_right, color: Colors.white, size: 28),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                );
-                              } else if (state is ViewProductLoading) {
-                                return SizedBox(
-                                  height: size.height * 0.15,
-                                  child: Center(
-                                      child: CircularProgressIndicator()),
-                                );
-                              } else {
-                                return SizedBox(height: size.height * 0.15);
-                              }
-                            },
-                          ),
-                          SizedBox(height: 20),
-                          Divider(
-                            thickness: 1,
-                            color: Colors.green.shade300,
-                            indent: 16,
-                            endIndent: 16,
-                          ),
-                          SizedBox(height: 12),
-                        ],
+                                        );
+                                      },
+                                    ),
+                                  );
+                                } else if (state is ViewProductLoading) {
+                                  return SizedBox(
+                                    height: size.height * 0.15,
+                                    child: Center(child: CircularProgressIndicator()),
+                                  );
+                                } else {
+                                  return SizedBox(height: size.height * 0.15);
+                                }
+                              },
+                            ),
+                            SizedBox(height: 20),
+                            Divider(
+                              thickness: 1,
+                              color: Colors.green.shade300,
+                              indent: 16,
+                              endIndent: 16,
+                            ),
+                            SizedBox(height: 12),
+                          ],
+                        ),
                       ),
                     ),
                     SliverPersistentHeader(
@@ -279,8 +271,7 @@ class _FarmerHomePageState extends State<FarmerHomePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding:
-                                    const EdgeInsets.only(bottom: 5, left: 15),
+                                padding: const EdgeInsets.only(bottom: 5, left: 15),
                                 child: Text(
                                   "All Products",
                                   style: TextStyle(
@@ -307,6 +298,7 @@ class _FarmerHomePageState extends State<FarmerHomePage> {
                   ];
                 },
                 body: TabBarView(
+                  physics: const AlwaysScrollableScrollPhysics(),  // مهم عشان السحب في التبويب يشتغل
                   children: [
                     Container(color: Colors.transparent, child: Vegetables()),
                     Container(color: Colors.transparent, child: Fruits()),
@@ -320,6 +312,9 @@ class _FarmerHomePageState extends State<FarmerHomePage> {
     );
   }
 }
+
+
+
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget _widget;
@@ -355,7 +350,6 @@ class _DetailsBottomSheetState extends State<DetailsBottomSheet> {
   @override
   void initState() {
     super.initState();
-    context.read<EditProductBloc>().add(GetIdProduct(widget.prod.id));
   }
 
   @override
@@ -411,12 +405,11 @@ class _DetailsBottomSheetState extends State<DetailsBottomSheet> {
                 // صورة المنتج
                 Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.lightGreen , width: 3)
-                        ,borderRadius: BorderRadius.circular(22)
-                  ),
+                      border: Border.all(color: Colors.lightGreen, width: 3),
+                      borderRadius: BorderRadius.circular(22)),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(22),
-                    child: Image.asset(
+                    child: Image.network(
                       widget.prod.image,
                       height: 200,
                       width: double.infinity,
@@ -563,11 +556,7 @@ class _DetailsBottomSheetState extends State<DetailsBottomSheet> {
 
                 const SizedBox(height: 24),
 
-   
-
-
                 const SizedBox(height: 24),
-
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -576,6 +565,8 @@ class _DetailsBottomSheetState extends State<DetailsBottomSheet> {
                       width: 100,
                       child: ElevatedButton(
                         onPressed: () {
+                          print("Tapped on product to edit");
+
                           _openEditDialog(widget.prod);
                         },
                         style: ElevatedButton.styleFrom(
@@ -593,6 +584,7 @@ class _DetailsBottomSheetState extends State<DetailsBottomSheet> {
                       width: 100,
                       child: ElevatedButton(
                         onPressed: () {
+                          print(widget.prod.id) ;
                           context
                               .read<EditProductBloc>()
                               .add(DeleteProductEvent(widget.prod.id));

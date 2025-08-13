@@ -4,6 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Farmer/Service/framwork.dart';
+
 part 'login_event.dart';
 part 'login_state.dart';
 
@@ -16,7 +18,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
 Future<void> _onloginbuttonpressed(LoginButtonPressed event, Emitter<LoginState> emit) async {
   emit(LoginLoading());
-  final url = Uri.parse("http://10.154.48.169:8000/api/login");
+  final url = Uri.parse("http://$ip:8000/api/login");
 
   try {
     final response = await http.post(
@@ -76,7 +78,7 @@ Future<void> _onLogoutRequested(LogoutRequested event, Emitter<LoginState> emit)
       return;
     }
 
-    final url = Uri.parse("https://37aa017e77720a1063768fc6ea025329.serveo.net/api/logout");
+    final url = Uri.parse("http://$ip:8000/api/logout");
 
     final response = await http.post(url, headers: {
       'Authorization': 'Bearer $token',

@@ -92,6 +92,9 @@ class _AddProductModalState extends State<AddProductModal> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,12 +107,12 @@ class _AddProductModalState extends State<AddProductModal> {
               children: [
                 ChoiceChip(
                   label: Text('Vegetables'),
-                  selected: _category == 'veg',
+                  selected: _category == 'vegetables',
                   selectedColor: _vegColor.withOpacity(0.3),
                   onSelected: (_) => setState(() {
-                    _category = 'veg';
+                    _category = 'vegetables';
                     _selectedProduct = null;
-                    context.read<ProductsBloc>().add(fetchProducts('veg'));
+                    context.read<ProductsBloc>().add(fetchProducts('vegetables'));
                   }),
                 ),
                 const SizedBox(width: 12),
@@ -144,18 +147,20 @@ class _AddProductModalState extends State<AddProductModal> {
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 10),
-              BlocBuilder<ProductsBloc, ProductsState>(
+
+              // ✅ عرض المنتجات أو المنتج المختار فقط
+              _selectedProduct == null
+                  ? BlocBuilder<ProductsBloc, ProductsState>(
                 builder: (context, state) {
                   if (state is ProductsLoading) {
                     return Center(child: CircularProgressIndicator());
-                  }
-                 else if (state is ProductsError) {
+                  } else if (state is ProductsError) {
                     return Center(child: Text('Error loading products'));
-                  }
-                  else if (state is ProductsLoaded) {
-                    final products = state.products; // List<Prdbycategory>
-                    final filtered = products.where((p) =>
-                        p.name.toLowerCase().contains(_searchController.text.toLowerCase())).toList();
+                  } else if (state is ProductsLoaded) {
+                    final products = state.products;
+                    final filtered = products.where((p) => p.name
+                        .toLowerCase()
+                        .contains(_searchController.text.toLowerCase())).toList();
 
                     if (filtered.isEmpty) {
                       return Center(child: Text('No products found'));
@@ -180,7 +185,8 @@ class _AddProductModalState extends State<AddProductModal> {
                                   : _lightGreen.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: isSelected ? activeColor : Colors.transparent,
+                                color:
+                                isSelected ? activeColor : Colors.transparent,
                                 width: 2,
                               ),
                               boxShadow: [
@@ -201,7 +207,9 @@ class _AddProductModalState extends State<AddProductModal> {
                                     height: 70,
                                     width: 70,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image, size: 70, color: Colors.grey),
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        Icon(Icons.broken_image,
+                                            size: 70, color: Colors.grey),
                                   ),
                                 ),
                                 SizedBox(height: 8),
@@ -210,7 +218,9 @@ class _AddProductModalState extends State<AddProductModal> {
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
-                                    color: isSelected ? activeColor : Colors.black87,
+                                    color: isSelected
+                                        ? activeColor
+                                        : Colors.black87,
                                   ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -221,17 +231,68 @@ class _AddProductModalState extends State<AddProductModal> {
                         );
                       }).toList(),
                     );
-                  }
-                 else {
+                  } else {
                     return SizedBox.shrink();
                   }
                 },
               )
+                  : BlocBuilder<ProductsBloc, ProductsState>(
+                builder: (context, state) {
+                  if (state is ProductsLoaded) {
+                    final selected = state.products.firstWhere(
+                          (p) => p.name == _selectedProduct,
+                      orElse: () => state.products.first,
+                    );
 
+                    return Container(
+                      margin: EdgeInsets.symmetric(vertical: 12),
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _lightGreen.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: activeColor, width: 2),
+                      ),
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              selected.image,
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Icon(Icons.broken_image, size: 60),
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              selected.name,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: activeColor,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.close, color: Colors.red),
+                            onPressed: () => setState(() {
+                              _selectedProduct = null;
+                            }),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return SizedBox.shrink();
+                  }
+                },
+              ),
 
-              ,
               SizedBox(height: 20),
             ],
+
             if (_selectedProduct != null) ...[
               Text('Quantity',
                   style: TextStyle(

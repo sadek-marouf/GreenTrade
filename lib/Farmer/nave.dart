@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import '../auth/login_bloc.dart';
 import 'Bloc/Farmer_bloc/Product/products_bloc.dart';
 
+import 'Bloc/Farmer_bloc/ViewProduct/viewproduct_bloc.dart';
 import 'Products/addproduct.dart';
 import 'Service/repositories/products_repository.dart';
 
@@ -24,6 +25,10 @@ class AnimatedNavBarPageWrapper extends StatelessWidget {
         BlocProvider<LoginBloc>(
           create: (_) => LoginBloc(),
         ),
+        BlocProvider<ViewproductBloc>(
+          create: (_) => ViewproductBloc(),
+        ),
+
       ],
       child: Builder(
         builder: (context) {
@@ -101,6 +106,8 @@ class _AnimatedNavBarPageState extends State<AnimatedNavBarPage>
                     return BlocProvider.value(
                       value: productsBloc,
                       child: AddProductModal(),
+
+
                     );
                   },
                 );
@@ -111,7 +118,9 @@ class _AnimatedNavBarPageState extends State<AnimatedNavBarPage>
                       content: Text('✅ تمت إضافة المنتج بنجاح'),
                       backgroundColor: Colors.green,
                     ),
+
                   );
+                  context.read<ViewproductBloc>().add(RefreshProducts());
                 }
               },
               child: const Icon(Icons.add),

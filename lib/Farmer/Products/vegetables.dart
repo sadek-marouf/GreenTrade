@@ -32,9 +32,10 @@ class _VegetablesState extends State<Vegetables> {
           }
 
           final vegetables =
-              state.Get_products.where((p) => p.category.toString() == 'veg').toList();
+              state.Get_products.where((p) => p.category.toString() == 'vegetables').toList();
           return AnimationLimiter(
             child: GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 8.0,

@@ -45,6 +45,7 @@ dependencies:
   flutter_staggered_animations: ^1.1.1
   image_picker: ^1.1.2
   carousel_slider: ^5.1.1
+  flutter_localization: ^0.3.3
 
 
 
