@@ -1,4 +1,5 @@
 
+import 'package:dio/dio.dart';
 import 'package:farm1/Trader/serch.dart';
 import 'package:farm1/WelcomPage.dart';
 import 'package:farm1/auth/homepageselect.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'Farmer/nave.dart';
 import 'Farmer/profile.dart';
 
+import 'Trader/Trader_Bloc/order_bloc.dart';
 import 'Trader/homepage.dart';
 import 'Trader/nav_tra.dart';
 import 'Trader/test.dart';
@@ -35,14 +37,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dio = Dio();
     // return MaterialApp(home: LoginPage(),routes: {
     //       'login': (context) => const LoginPage(),
     //       'register': (context) => const RegisterPage(),
     //       'homes_elect': (context) => const HomePageSelect(),
     //     },) ;
 
-    return  BlocProvider(
-        create: (_) => RegistrationBloc(),
+    return  MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => OrderBloc(dio: dio)),
+        BlocProvider(create: (_) => RegistrationBloc()),],
     child :
 
       MaterialApp(

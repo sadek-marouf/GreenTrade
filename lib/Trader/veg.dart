@@ -1,14 +1,18 @@
+import 'package:farm1/Trader/visitfarmer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 import '../Trader/Service/Service.dart';
+import 'Trader_Bloc/order_bloc.dart';
 
 
 
 class Vegetables extends StatelessWidget {
   final List<Product> products;
+  final int farmerid ;
 
-  const Vegetables({super.key, required this.products});
+  const Vegetables({super.key, required this.products,required this.farmerid});
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +42,25 @@ class Vegetables extends StatelessWidget {
                       borderRadius: BorderRadius.circular(15)),
                   elevation: 5,
                   child: InkWell(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                        ),
+                        builder: (_) {
+                          return BlocProvider.value(
+                            value: context.read<OrderBloc>(), // 👈 مهم جداً
+                            child: DetailsBottomSheetTrader(
+                              prod: veg,
+                              farmerid: farmerid,
+                            ),
+                          );
+                        },
+                      );
+
+                    },
 
                     child: Padding(
                       padding: const EdgeInsets.all(3.0),
@@ -56,7 +79,7 @@ class Vegetables extends StatelessWidget {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
                                     child: Image.network(
-                                      veg.url!,
+                                      veg.url ?? "",
                                       width: double.infinity,
                                       fit: BoxFit.cover,
                                       errorBuilder:
@@ -73,7 +96,7 @@ class Vegetables extends StatelessWidget {
                                       padding: EdgeInsets.symmetric(
                                           horizontal: 6, vertical: 2),
                                       decoration: BoxDecoration(
-                                        color: Colors.redAccent,
+                                        color: Colors.green,
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
@@ -92,11 +115,21 @@ class Vegetables extends StatelessWidget {
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.w500)),
                           SizedBox(height: 10),
-                          Text(' Quantity: ${veg.quantity}',
-                              style: TextStyle(fontSize: 15, color: Colors.black)),
+                          Row(
+                            children: [
+                              Text(' الكمية : ',
+                                  style: TextStyle(fontSize: 15, color: Colors.black,fontWeight: FontWeight.bold)),
+                              Text("${veg.quantity} Kg" ,style: TextStyle(color: Colors.green),)
+                            ],
+                          ),
                           SizedBox(height: 5),
-                          Text(' Price: ${veg.priceOfKilo}',
-                              style: TextStyle(fontSize: 15, color: Colors.black)),
+                          Row(
+                            children: [
+                              Text(' السعر :   ',
+                                  style: TextStyle(fontSize: 15, color: Colors.black,fontWeight: FontWeight.bold)),
+                              Text("${veg.totalPrice} SYP",style: TextStyle(color: Colors.green,fontSize: 16))
+                            ],
+                          ),
                         ],
                       ),
                     ),

@@ -170,3 +170,100 @@ class Farmerd {
     );
   }
 }
+class ProductModel {
+  final int id;
+  final String name;
+  final String category;
+  final String description;
+  final double quantity;
+  final double priceOfKilo;
+  final double totalPrice;
+  final String? url;
+
+  ProductModel({
+    required this.id,
+    required this.name,
+    required this.category,
+    required this.description,
+    required this.quantity,
+    required this.priceOfKilo,
+    required this.totalPrice,
+    this.url,
+  });
+
+  factory ProductModel.fromJson(Map<String, dynamic> json) {
+    return ProductModel(
+      id: json['id'],
+      name: json['name'],
+      category: json['category'],
+      description: json['description'],
+      quantity: (json['quantity'] as num).toDouble(),
+      priceOfKilo: double.parse(json['price_of_kilo'].toString()),
+      totalPrice: double.parse(json['total_price'].toString()),
+      url: json['url'],
+    );
+  }
+}
+
+class OrderItemModel {
+  final int id;
+  final int orderId;
+  final int productId;
+  final double kilos;
+  final double pricePerKilo;
+  final double totalPrice;
+  final ProductModel product;
+
+  OrderItemModel({
+    required this.id,
+    required this.orderId,
+    required this.productId,
+    required this.kilos,
+    required this.pricePerKilo,
+    required this.totalPrice,
+    required this.product,
+  });
+
+  factory OrderItemModel.fromJson(Map<String, dynamic> json) {
+    return OrderItemModel(
+      id: json['id'],
+      orderId: json['order_id'],
+      productId: json['product_id'],
+      kilos: double.parse(json['kilos'].toString()),
+      pricePerKilo: double.parse(json['price_per_kilo'].toString()),
+      totalPrice: double.parse(json['total_price'].toString()),
+      product: ProductModel.fromJson(json['product']),
+    );
+  }
+}
+
+class OrderModel {
+  final int id;
+  final int traderId;
+  final int farmerId;
+  final double totalPrice;
+  final String status;
+  final List<OrderItemModel> items;
+
+  OrderModel({
+    required this.id,
+    required this.traderId,
+    required this.farmerId,
+    required this.totalPrice,
+    required this.status,
+    required this.items,
+  });
+
+  factory OrderModel.fromJson(Map<String, dynamic> json) {
+    return OrderModel(
+      id: json['id'],
+      traderId: json['trader_id'],
+      farmerId: int.parse(json['farmer_id'].toString()),
+      totalPrice: double.parse(json['total_price'].toString()),
+      status: json['status'],
+      items: (json['items'] as List)
+          .map((e) => OrderItemModel.fromJson(e))
+          .toList(),
+    );
+  }
+}

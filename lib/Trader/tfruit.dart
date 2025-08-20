@@ -1,3 +1,4 @@
+import 'package:farm1/Trader/visitfarmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
@@ -5,8 +6,9 @@ import '../Trader/Service/Service.dart';
 
 class Fruits extends StatelessWidget {
   final List<Product> products;
+  final int farmerid ;
 
-  const Fruits({super.key, required this.products});
+  const Fruits({super.key, required this.products,required this.farmerid});
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,22 @@ class Fruits extends StatelessWidget {
                   elevation: 5,
                   child: InkWell(
 
+                    onTap: () {
+                      showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(24)),
+                          ),
+                          builder: (context) {
+                            return DetailsBottomSheetTrader(
+                              prod: fruit,
+                              farmerid: farmerid,
+                            );
+                          });
+                    },
+
                     child: Padding(
                       padding: const EdgeInsets.all(3.0),
                       child: Column(
@@ -54,7 +72,7 @@ class Fruits extends StatelessWidget {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
                                     child: Image.network(
-                                      fruit.url!,
+                                      fruit.url ?? "",
                                       width: double.infinity,
                                       fit: BoxFit.cover,
                                       errorBuilder:
@@ -71,7 +89,7 @@ class Fruits extends StatelessWidget {
                                       padding: EdgeInsets.symmetric(
                                           horizontal: 6, vertical: 2),
                                       decoration: BoxDecoration(
-                                        color: Colors.redAccent,
+                                        color: Colors.green,
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
@@ -90,10 +108,10 @@ class Fruits extends StatelessWidget {
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.w500)),
                           SizedBox(height: 10),
-                          Text(' Quantity: ${fruit.quantity}',
+                          Text(' الكمية : ${fruit.quantity}',
                               style: TextStyle(fontSize: 15, color: Colors.black)),
                           SizedBox(height: 5),
-                          Text(' Price: ${fruit.priceOfKilo}',
+                          Text(' السعر :  ${fruit.totalPrice} ',
                               style: TextStyle(fontSize: 15, color: Colors.black)),
                         ],
                       ),
